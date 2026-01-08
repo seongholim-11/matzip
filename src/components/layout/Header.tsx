@@ -1,6 +1,6 @@
 "use client"
 
-import { Map, Menu, Search, Tv, X } from "lucide-react"
+import { Map, Search, Tv } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -11,7 +11,7 @@ import { useUIStore } from "@/store/uiStore"
 export function Header() {
   const pathname = usePathname()
   const isMobile = useIsMobile()
-  const { isSearchFocused, setSearchFocused } = useUIStore()
+  const { setSearchFocused } = useUIStore()
 
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">

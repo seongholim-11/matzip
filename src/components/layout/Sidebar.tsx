@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { EmptyState } from "@/components/common/EmptyState"
 import { Loading } from "@/components/common/Loading"
 import { RestaurantCard } from "@/components/restaurant/RestaurantCard"
-import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/store/uiStore"
 import type { Restaurant } from "@/types/model"
 

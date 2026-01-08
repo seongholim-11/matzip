@@ -72,7 +72,9 @@ async function getProgram(id: string): Promise<Program | null> {
   return MOCK_PROGRAMS.find((p) => p.id === id) ?? null
 }
 
-async function getProgramRestaurants(programId: string): Promise<Restaurant[]> {
+async function getProgramRestaurants(
+  _programId: string
+): Promise<Restaurant[]> {
   // Mock: 모든 맛집 반환 (실제로는 해당 프로그램에 출연한 맛집만)
   return MOCK_RESTAURANTS
 }

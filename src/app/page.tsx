@@ -91,9 +91,8 @@ function MapPage() {
   const [isLoading] = useState(false)
 
   // 지도 bounds 변경 시 호출
-  const handleBoundsChanged = useCallback((bounds: MapBounds) => {
+  const handleBoundsChanged = useCallback((_bounds: MapBounds) => {
     // TODO: bounds 내 맛집 조회 API 호출
-    console.log("Bounds changed:", bounds)
   }, [])
 
   // 마커 클릭 시
@@ -107,14 +106,10 @@ function MapPage() {
   // 내 위치로 이동
   const handleMyLocation = useCallback(() => {
     getCurrentPosition()
-  }, [getCurrentPosition])
-
-  // 위치 얻었을 때 지도 이동
-  const handleLocationUpdate = useCallback(() => {
     if (latitude && longitude && mapRef.current) {
       mapRef.current.panTo(latitude, longitude)
     }
-  }, [latitude, longitude])
+  }, [getCurrentPosition, latitude, longitude])
 
   // 선택된 맛집
   const selectedRestaurant = useMemo(() => {

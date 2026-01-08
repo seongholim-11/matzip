@@ -54,12 +54,12 @@ const MOCK_RESTAURANTS: Restaurant[] = [
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
 
-  const lat = searchParams.get("lat")
-  const lng = searchParams.get("lng")
-  const radius = searchParams.get("radius")
+  const _lat = searchParams.get("lat")
+  const _lng = searchParams.get("lng")
+  const _radius = searchParams.get("radius")
   const keyword = searchParams.get("keyword")
   const category = searchParams.get("category")
-  const programId = searchParams.get("program_id")
+  const _programId = searchParams.get("program_id")
   const page = parseInt(searchParams.get("page") || "1")
   const limit = parseInt(searchParams.get("limit") || "20")
 

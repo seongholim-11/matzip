@@ -132,26 +132,26 @@ export function NaverMap({
     }
   }, [selectedRestaurantId, restaurants, isReady])
 
-  // 외부에서 지도 객체 접근용 함수들
-  const panTo = useCallback((lat: number, lng: number) => {
+  // 외부에서 지도 객체 접근용 함수들 (향후 사용 예정)
+  const _panTo = useCallback((lat: number, lng: number) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.panTo(new naver.maps.LatLng(lat, lng))
     }
   }, [])
 
-  const setZoom = useCallback((zoom: number) => {
+  const _setZoom = useCallback((zoom: number) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setZoom(zoom)
     }
   }, [])
 
-  const zoomIn = useCallback(() => {
+  const _zoomIn = useCallback(() => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setZoom(mapInstanceRef.current.getZoom() + 1)
     }
   }, [])
 
-  const zoomOut = useCallback(() => {
+  const _zoomOut = useCallback(() => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setZoom(mapInstanceRef.current.getZoom() - 1)
     }
