@@ -176,7 +176,7 @@ export function NaverMap({
     <>
       <Script
         strategy="afterInteractive"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_CLIENT_ID}`}
         onReady={initMap}
       />
       <div ref={mapRef} className="h-full w-full" />
