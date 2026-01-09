@@ -9,6 +9,10 @@ interface MapControlsProps {
   isLocating?: boolean
 }
 
+/**
+ * 지도 우측 하단에 위치하는 컨트롤 버튼들입니다.
+ * 확대(+), 축소(-), 내 위치 찾기 버튼을 포함합니다.
+ */
 export function MapControls({
   onZoomIn,
   onZoomOut,

@@ -29,6 +29,10 @@ const defaultContent = {
   },
 }
 
+/**
+ * 맛집 목록이 없거나 검색 결과가 없을 때 보여주는 안내 화면입니다.
+ * 상황(type)에 따라 다른 아이콘과 문구를 보여줍니다.
+ */
 export function EmptyState({
   type = "default",
   title,

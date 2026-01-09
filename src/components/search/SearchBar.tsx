@@ -9,6 +9,9 @@ interface SearchBarProps {
   placeholder?: string
 }
 
+/**
+ * 맛집이나 지역 이름을 입력하여 찾을 수 있는 검색창 컴포넌트입니다.
+ */
 export function SearchBar({
   value,
   onChange,

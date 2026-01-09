@@ -22,6 +22,9 @@ const defaultOptions: UseGeolocationOptions = {
   maximumAge: 0,
 }
 
+/**
+ * 사용자의 현재 GPS 위치(위도, 경도)를 가져오는 기능을 제공하는 훅입니다.
+ */
 export function useGeolocation(
   options: UseGeolocationOptions = defaultOptions
 ) {
@@ -33,6 +36,7 @@ export function useGeolocation(
     isLoading: false,
   })
 
+  /** 브라우저의 전역 객체(navigator)를 이용해 위치를 요청합니다. */
   const getCurrentPosition = useCallback(() => {
     if (!navigator.geolocation) {
       setState((prev) => ({

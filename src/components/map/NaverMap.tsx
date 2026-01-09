@@ -21,6 +21,9 @@ interface NaverMapProps {
 
 const NAVER_CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID || ""
 
+/**
+ * 네이버 지도 API를 사용하여 지도를 화면에 그리고 제어하는 컴포넌트입니다.
+ */
 export function NaverMap({
   restaurants = [],
   initialCenter = DEFAULT_MAP_CENTER,
@@ -29,24 +32,27 @@ export function NaverMap({
   onMarkerClick,
   selectedRestaurantId,
 }: NaverMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<naver.maps.Map | null>(null)
-  const markersRef = useRef<naver.maps.Marker[]>([])
-  const [isReady, setIsReady] = useState(false)
+  const mapRef = useRef<HTMLDivElement>(null) // 지도가 그려질 HTML 엘리먼트 참조
+  const mapInstanceRef = useRef<naver.maps.Map | null>(null) // 실제 네이버 지도 객체
+  const markersRef = useRef<naver.maps.Marker[]>([]) // 현재 지도에 표시된 마커들의 배열
+  const [isReady, setIsReady] = useState(false) // 지도가 준비되었는지 여부
 
-  // 지도 초기화
+  /**
+   * 지도를 초기에 설정하는 함수입니다.
+   */
   const initMap = useCallback(() => {
     if (!mapRef.current || !window.naver?.maps) return
 
+    // 지도가 처음 켜질 때의 옵션(중심 위치, 확대 레벨 등)을 설정합니다.
     const mapOptions: naver.maps.MapOptions = {
       center: new naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
       zoom: initialZoom,
       minZoom: 6,
       maxZoom: 21,
-      zoomControl: false,
+      zoomControl: false, // 기본 줌 버튼 숨김 (커스텀 버튼 사용)
       mapDataControl: false,
       scaleControl: false,
-      logoControl: true,
+      logoControl: true, // 네이버 로고 표시
       logoControlOptions: {
         position: naver.maps.Position.BOTTOM_LEFT,
       },
@@ -55,7 +61,10 @@ export function NaverMap({
     const map = new naver.maps.Map(mapRef.current, mapOptions)
     mapInstanceRef.current = map
 
-    // 지도 이동 완료 시 bounds 업데이트
+    /**
+     * 사용자가 지도를 움직여서 '멈췄을 때'(idle 상태) 실행됩니다.
+     * 현재 화면에 보이는 영역(동서남북 좌표)을 부모 컴포넌트에 알려줍니다.
+     */
     naver.maps.Event.addListener(map, "idle", () => {
       if (onBoundsChanged) {
         const bounds = map.getBounds() as naver.maps.LatLngBounds
@@ -73,15 +82,17 @@ export function NaverMap({
     setIsReady(true)
   }, [initialCenter, initialZoom, onBoundsChanged])
 
-  // 마커 생성/업데이트
+  /**
+   * 맛집 리스트가 바뀌거나 지도가 준비되면 마커를 새로 그립니다.
+   */
   useEffect(() => {
     if (!isReady || !mapInstanceRef.current) return
 
-    // 기존 마커 제거
+    // 1. 기존에 그려져 있던 마커들을 지도에서 모두 지웁니다.
     markersRef.current.forEach((marker) => marker.setMap(null))
     markersRef.current = []
 
-    // 새 마커 생성
+    // 2. 새로운 맛집 리스트를 돌면서 마커를 하나씩 생성합니다.
     restaurants.forEach((restaurant) => {
       const marker = new naver.maps.Marker({
         position: new naver.maps.LatLng(
@@ -90,6 +101,7 @@ export function NaverMap({
         ),
         map: mapInstanceRef.current!,
         title: restaurant.name,
+        // 마커의 모양(디자인)을 직접 HTML과 CSS로 정의합니다.
         icon: {
           content: `
             <div class="marker ${selectedRestaurantId === restaurant.id ? "marker--selected" : ""}">
@@ -105,6 +117,7 @@ export function NaverMap({
         },
       })
 
+      /** 마커를 클릭했을 때의 동작을 정의합니다. */
       naver.maps.Event.addListener(marker, "click", () => {
         if (onMarkerClick) {
           onMarkerClick(restaurant.id)
@@ -115,7 +128,9 @@ export function NaverMap({
     })
   }, [restaurants, isReady, selectedRestaurantId, onMarkerClick])
 
-  // 선택된 맛집으로 지도 이동
+  /**
+   * 목록에서 맛집이 선택되면 지도의 중심을 해당 맛집으로 부드럽게 이동시킵니다.
+   */
   useEffect(() => {
     if (!isReady || !mapInstanceRef.current || !selectedRestaurantId) return
 

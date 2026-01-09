@@ -13,6 +13,9 @@ interface ShareModalInternalProps {
   url: string
 }
 
+/**
+ * 맛집 정보를 친구에게 전달할 수 있도록 링크를 복사하거나 카톡으로 보낼 수 있는 창(모달)입니다.
+ */
 export function ShareModal({
   isOpen,
   onClose,
@@ -21,13 +24,14 @@ export function ShareModal({
 }: ShareModalInternalProps) {
   const [copied, setCopied] = useState(false)
 
+  /** 주소를 복사해서 클립보드에 담습니다. */
   const copyToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // 클립보드 API 실패 시 fallback
+      // 구형 브라우저 등을 위한 보조 방법
       const textarea = document.createElement("textarea")
       textarea.value = url
       document.body.appendChild(textarea)

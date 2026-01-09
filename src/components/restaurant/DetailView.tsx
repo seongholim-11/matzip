@@ -14,10 +14,14 @@ interface DetailViewProps {
   restaurant: RestaurantDetail
 }
 
+/**
+ * 맛집의 모든 상세 정보를 보여주는 컴포넌트입니다.
+ * 사진, 방송 출연 정보, 메뉴, 영업 시간 등을 포함합니다.
+ */
 export function DetailView({ restaurant }: DetailViewProps) {
   return (
     <div className="space-y-6">
-      {/* 히어로 이미지 */}
+      {/* 상단 큰 이미지 (배경처럼 보여줌) */}
       <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-xl">
         {restaurant.thumbnail_url ? (
           <Image
@@ -25,7 +29,7 @@ export function DetailView({ restaurant }: DetailViewProps) {
             alt={restaurant.name}
             fill
             className="object-cover"
-            priority
+            priority // 이 이미지는 중요하므로 빨리 불러오도록 함
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
@@ -49,7 +53,7 @@ export function DetailView({ restaurant }: DetailViewProps) {
 
         <h1 className="mb-4 text-2xl font-bold">{restaurant.name}</h1>
 
-        {/* 방송 출연 정보 */}
+        {/* 방송 출연 정보 (데이터가 있는 경우에만 보여줌) */}
         {restaurant.appearances && restaurant.appearances.length > 0 && (
           <div className="mb-4 rounded-xl bg-gradient-to-r from-orange-50 to-red-50 p-4">
             <div className="mb-2 flex items-center gap-2 text-orange-700">
@@ -79,7 +83,7 @@ export function DetailView({ restaurant }: DetailViewProps) {
           </div>
         )}
 
-        {/* 상세 정보 목록 */}
+        {/* 위치, 전화번호, 영업시간 등 상세 내용 목록 */}
         <div className="space-y-3 text-sm">
           <div className="flex items-start gap-3">
             <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
@@ -110,6 +114,7 @@ export function DetailView({ restaurant }: DetailViewProps) {
             <div className="flex items-start gap-3">
               <Clock className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
               <div>
+                {/* 월, 화, 수... 요일별 시간을 돌면서 표시 */}
                 {Object.entries(restaurant.business_hours).map(
                   ([day, hours]) => (
                     <p key={day}>
@@ -125,7 +130,7 @@ export function DetailView({ restaurant }: DetailViewProps) {
           {restaurant.parking && (
             <div className="flex items-center gap-3">
               <Car className="text-muted-foreground h-4 w-4" />
-              <span>주차 가능</span>
+              <span>주차 가능 (방문 전 확인 권장)</span>
             </div>
           )}
         </div>

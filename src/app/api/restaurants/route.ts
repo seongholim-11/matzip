@@ -51,7 +51,12 @@ const MOCK_RESTAURANTS: Restaurant[] = [
   },
 ]
 
+/**
+ * 맛집 목록을 가져오는 API 핸들러입니다. (GET 요청 처리)
+ * 검색어, 카테고리, 페이지네이션 등의 조건을 처리합니다.
+ */
 export async function GET(request: Request) {
+  // URL에서 쿼리 파라미터(예: ?keyword=피자)를 추출합니다.
   const { searchParams } = new URL(request.url)
 
   const _lat = searchParams.get("lat")
@@ -60,12 +65,13 @@ export async function GET(request: Request) {
   const keyword = searchParams.get("keyword")
   const category = searchParams.get("category")
   const _programId = searchParams.get("program_id")
-  const page = parseInt(searchParams.get("page") || "1")
-  const limit = parseInt(searchParams.get("limit") || "20")
+  const page = parseInt(searchParams.get("page") || "1") // 기본값 1페이지
+  const limit = parseInt(searchParams.get("limit") || "20") // 한 페이지에 20개씩
 
+  // 전체 맛집 목록에서 필터링을 시작합니다.
   let filteredRestaurants = [...MOCK_RESTAURANTS]
 
-  // 키워드 검색
+  // 키워드 검색 기능 (이름이나 주소에 키워드가 포함되어 있는지 확인)
   if (keyword) {
     const lowerKeyword = keyword.toLowerCase()
     filteredRestaurants = filteredRestaurants.filter(
@@ -75,23 +81,24 @@ export async function GET(request: Request) {
     )
   }
 
-  // 카테고리 필터
+  // 카테고리 필터 기능 (예: '한식'만 보기)
   if (category) {
     filteredRestaurants = filteredRestaurants.filter(
       (r) => r.category === category
     )
   }
 
-  // TODO: 위치 기반 필터링 (lat, lng, radius)
-  // TODO: 프로그램 필터 (programId)
+  // TODO: 위치 기반 필터링 (위도, 경도, 반경 활용)
+  // TODO: 방송 프로그램 필터링
 
-  // 페이지네이션
+  // 요청한 페이지에 맞는 데이터만 잘라냅니다. (페이지네이션)
   const startIndex = (page - 1) * limit
   const paginatedRestaurants = filteredRestaurants.slice(
     startIndex,
     startIndex + limit
   )
 
+  // 결과 데이터와 함께 전체 개수, 현재 페이지 정보를 응답으로 보냅니다.
   return NextResponse.json({
     items: paginatedRestaurants,
     total: filteredRestaurants.length,

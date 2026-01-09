@@ -13,6 +13,9 @@ interface RestaurantCardProps {
   onClick?: () => void
 }
 
+/**
+ * 맛집 목록이나 검색 결과에서 한 개의 맛집을 보여주는 카드형 컴포넌트입니다.
+ */
 export function RestaurantCard({
   restaurant,
   isSelected,
@@ -26,7 +29,7 @@ export function RestaurantCard({
       onClick={onClick}
     >
       <div className="flex gap-3">
-        {/* 썸네일 */}
+        {/* 맛집 대표 이미지 (없으면 기본 아이콘 표시) */}
         <div className="bg-muted relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
           {restaurant.thumbnail_url ? (
             <Image
@@ -65,13 +68,13 @@ export function RestaurantCard({
         </div>
       </div>
 
-      {/* 액션 버튼 (호버 시) */}
+      {/* 카드가 선택되었을 때만 나타나는 추가 버튼 (상세보기, 길찾기) */}
       {isSelected && (
         <div className="mt-3 flex gap-2">
           <Link
             href={`/restaurant/${restaurant.id}`}
             className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // 카드 자체의 클릭 이벤트가 실행되지 않게 막음
           >
             상세보기
           </Link>

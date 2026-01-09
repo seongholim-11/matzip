@@ -12,6 +12,9 @@ interface OverlayCardProps {
   onClose: () => void
 }
 
+/**
+ * 지도 위 마커를 클릭했을 때 해당 위치에 작게 나타나는 요약 정보 카드입니다.
+ */
 export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
   return (
     <div className="bg-background absolute bottom-20 left-1/2 z-20 w-[280px] -translate-x-1/2 overflow-hidden rounded-xl border shadow-xl lg:bottom-24 lg:w-[320px]">
@@ -24,7 +27,7 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
       </button>
 
       <Link href={`/restaurant/${restaurant.id}`}>
-        {/* 이미지 */}
+        {/* 맛집 이미지 (없을 땐 핀 아이콘 표시) */}
         <div className="bg-muted relative h-32 w-full lg:h-40">
           {restaurant.thumbnail_url ? (
             <Image
@@ -41,7 +44,7 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
           )}
         </div>
 
-        {/* 정보 */}
+        {/* 짧은 정보 (이름, 카테고리, 주소) */}
         <div className="p-3">
           <div className="mb-1 flex items-center gap-2">
             <span className="bg-muted rounded-full px-2 py-0.5 text-xs">

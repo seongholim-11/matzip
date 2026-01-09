@@ -11,6 +11,9 @@ interface MobileDrawerProps {
   title?: string
 }
 
+/**
+ * 모바일 화면에서 화면 하단에서 슥- 하고 올라오는 상세 창입니다.
+ */
 export function MobileDrawer({
   isOpen,
   onClose,

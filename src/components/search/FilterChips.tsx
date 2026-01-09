@@ -11,6 +11,9 @@ interface FilterChipsProps {
   programs?: Program[]
 }
 
+/**
+ * 음식 종류(한식, 일식 등)나 방송 종류를 필터링하는 버튼(칩)들입니다.
+ */
 export function FilterChips({
   selectedCategory,
   selectedProgram,

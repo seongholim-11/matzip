@@ -14,10 +14,13 @@ interface UseMapStateOptions {
   initialZoom?: number
 }
 
+/**
+ * 지도의 중심 위치와 확대 레벨(줌) 상태를 관리하는 훅입니다.
+ */
 export function useMapState(options: UseMapStateOptions = {}) {
   const [mapState, setMapState] = useState<MapState>({
-    center: options.initialCenter ?? DEFAULT_MAP_CENTER,
-    zoom: options.initialZoom ?? DEFAULT_MAP_ZOOM,
+    center: options.initialCenter ?? DEFAULT_MAP_CENTER, // 기본 중심 좌표
+    zoom: options.initialZoom ?? DEFAULT_MAP_ZOOM, // 기본 줌 레벨
   })
 
   const [bounds, setBounds] = useState<MapBounds | null>(null)

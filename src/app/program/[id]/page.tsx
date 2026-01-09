@@ -68,17 +68,23 @@ const MOCK_RESTAURANTS: Restaurant[] = [
   },
 ]
 
+/** ID로 프로그램 정보를 가져오는 (가상의) 함수입니다. */
 async function getProgram(id: string): Promise<Program | null> {
   return MOCK_PROGRAMS.find((p) => p.id === id) ?? null
 }
 
+/** 해당 프로그램에 출연한 맛집 목록을 가져오는 (가상의) 함수입니다. */
 async function getProgramRestaurants(
   _programId: string
 ): Promise<Restaurant[]> {
-  // Mock: 모든 맛집 반환 (실제로는 해당 프로그램에 출연한 맛집만)
+  // Mock: 모든 맛집 반환 (실제로는 해당 프로그램에 출연한 맛집만 DB에서 골라옵니다)
   return MOCK_RESTAURANTS
 }
 
+/**
+ * 이 페이지의 제목(Title)과 설명(Description)을 동적으로 생성합니다.
+ * 검색 엔진이나 링크 공유 시에 활용됩니다.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -97,23 +103,27 @@ export async function generateMetadata({
   }
 }
 
+/**
+ * 특정 방송 프로그램의 상세 정보와 해당 방송에 나온 맛집들을 보여주는 페이지입니다.
+ */
 export default async function ProgramDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const program = await getProgram(id)
+  const program = await getProgram(id) // 프로그램 정보 조회
 
+  // 프로그램이 없으면 404 페이지를 보여줍니다.
   if (!program) {
     notFound()
   }
 
-  const restaurants = await getProgramRestaurants(id)
+  const restaurants = await getProgramRestaurants(id) // 맛집 목록 조회
 
   return (
     <div className="bg-background min-h-dvh">
-      {/* 헤더 */}
+      {/* 상단 네비게이션 헤더 */}
       <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 flex h-14 items-center gap-4 border-b px-4 backdrop-blur">
         <Link
           href="/program"
@@ -125,9 +135,10 @@ export default async function ProgramDetailPage({
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
-        {/* 프로그램 정보 */}
+        {/* 프로그램 요약 정보 카드 */}
         <div className="mb-8 rounded-xl bg-gradient-to-r from-orange-50 to-red-50 p-6">
           <div className="mb-4 flex items-center gap-4">
+            {/* TV인지 유튜브인지에 따른 아이콘 표시 */}
             <div
               className={`flex h-16 w-16 items-center justify-center rounded-full ${
                 program.type === "TV" ? "bg-blue-100" : "bg-red-100"
@@ -147,12 +158,13 @@ export default async function ProgramDetailPage({
           <p className="text-muted-foreground">{program.description}</p>
         </div>
 
-        {/* 맛집 목록 */}
+        {/* 맛집 목록 섹션 */}
         <section>
           <h3 className="mb-4 text-xl font-bold">
             소개된 맛집 ({restaurants.length})
           </h3>
           <div className="divide-y rounded-xl border">
+            {/* 맛집 리스트를 순회하며 카드 형태로 보여줍니다. */}
             {restaurants.map((restaurant) => (
               <RestaurantCard
                 key={restaurant.id}

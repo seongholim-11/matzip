@@ -4,6 +4,9 @@ import { useCallback, useMemo } from "react"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+/**
+ * 브라우저 주소창의 쿼리 파라미터(?category=korean 등)를 쉽게 읽고 쓸 수 있게 해주는 훅입니다.
+ */
 export function useQueryParams() {
   const router = useRouter()
   const pathname = usePathname()

@@ -10,8 +10,11 @@ interface MenuListProps {
   menus: Menu[]
 }
 
+/**
+ * 맛집의 메뉴들을 목록 형태로 보여주는 컴포넌트입니다.
+ */
 export function MenuList({ menus }: MenuListProps) {
-  // 대표 메뉴를 먼저 정렬
+  /** 사용자가 보기 편하게 '대표 메뉴'를 리스트의 가장 위로 올립니다. */
   const sortedMenus = [...menus].sort((a, b) => {
     if (a.is_main && !b.is_main) return -1
     if (!a.is_main && b.is_main) return 1
@@ -35,7 +38,7 @@ export function MenuList({ menus }: MenuListProps) {
             </div>
           )}
 
-          {/* 메뉴 정보 */}
+          {/* 메뉴 이름 및 대표 메뉴 표시(별 아이콘) */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h4 className="font-medium">{menu.name}</h4>
