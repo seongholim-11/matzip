@@ -19,6 +19,7 @@ import { OverlayCard } from "@/components/map/OverlayCard"
 import { FilterChips } from "@/components/search/FilterChips"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import { useIsDesktop } from "@/hooks/useMediaQuery"
+import { logger } from "@/services/logger"
 import { useUIStore } from "@/store/uiStore"
 import type { MapBounds, Program, Restaurant } from "@/types/model"
 
@@ -64,6 +65,7 @@ function MapPage() {
       setRestaurants(data.items || [])
     } catch (error) {
       // TODO: 에러 처리 UI 구현
+      logger.error("Failed to fetch restaurants:", error)
     } finally {
       setIsLoading(false)
     }
@@ -77,6 +79,7 @@ function MapPage() {
       setPrograms(data || [])
     } catch (error) {
       // TODO: 에러 처리 UI 구현
+      logger.error("Failed to fetch restaurants:", error)
     }
   }, [])
 
