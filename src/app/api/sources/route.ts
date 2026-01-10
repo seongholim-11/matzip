@@ -11,7 +11,6 @@ export async function GET() {
     .order("name")
 
   if (error) {
-    console.error("Supabase error fetching sources:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

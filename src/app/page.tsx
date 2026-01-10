@@ -20,7 +20,7 @@ import { FilterChips } from "@/components/search/FilterChips"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import { useIsDesktop } from "@/hooks/useMediaQuery"
 import { useUIStore } from "@/store/uiStore"
-import type { MapBounds, Restaurant } from "@/types/model"
+import type { MapBounds, Program, Restaurant } from "@/types/model"
 
 /**
  * 메인 지도 페이지의 핵심 로직과 화면을 구성하는 컴포넌트입니다.
@@ -48,7 +48,7 @@ function MapPage() {
 
   // 실제 데이터 상태
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
-  const [programs, setPrograms] = useState<any[]>([])
+  const [programs, setPrograms] = useState<Program[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   // 식당 데이터 가져오기
@@ -63,7 +63,7 @@ function MapPage() {
       const data = await response.json()
       setRestaurants(data.items || [])
     } catch (error) {
-      console.error("Failed to fetch restaurants:", error)
+      // TODO: 에러 처리 UI 구현
     } finally {
       setIsLoading(false)
     }
@@ -76,7 +76,7 @@ function MapPage() {
       const data = await response.json()
       setPrograms(data || [])
     } catch (error) {
-      console.error("Failed to fetch programs:", error)
+      // TODO: 에러 처리 UI 구현
     }
   }, [])
 
@@ -113,10 +113,7 @@ function MapPage() {
 
   const filteredRestaurants = useMemo(() => {
     // API에서 이미 필터링되어 오지만, 프로그램 필터는 프론트엔드에서 처리하거나 API를 확장할 수 있음
-    return restaurants.filter((r) => {
-      // 프로그램 아이디 기반 필터링은 추후 restaurant_recommendations 테이블 조인 필요
-      return true
-    })
+    return restaurants
   }, [restaurants])
 
   return (

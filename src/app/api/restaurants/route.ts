@@ -53,12 +53,25 @@ export async function GET(request: Request) {
   const { data, error, count } = await query
 
   if (error) {
-    console.error("Supabase error:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  interface SupabaseRestaurant {
+    id: string
+    name: string
+    address: string
+    road_address: string
+    phone: string
+    price_range: string
+    parking: boolean
+    thumbnail_url: string
+    created_at: string
+    location: { coordinates: [number, number] } | null
+    category: { name: string } | null
+  }
+
   // 데이터 가공: nested category와 PostGIS geography 데이터를 평탄화(flatten)합니다.
-  const items = (data || []).map((r: any) => {
+  const items = ((data as unknown as SupabaseRestaurant[]) || []).map((r) => {
     // PostGIS geography (POINT) 파싱 (GeoJSON 형태 혹은 WKT일 수 있으나 supabase-js는 보통 파싱을 요구함)
     // 여기서는 간단하게 SQL에서 추출하는 대신 JS에서 처리하거나 SQL query를 수정할 수 있음.
     // 하지만 select 절에서 직접 위경도를 가져오는 것이 더 깔끔함.
