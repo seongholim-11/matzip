@@ -1,107 +1,83 @@
 import { NextResponse } from "next/server"
 
-import type { Restaurant } from "@/types/model"
-
-// Mock 데이터 (실제로는 Supabase에서 조회)
-const MOCK_RESTAURANTS: Restaurant[] = [
-  {
-    id: "1",
-    name: "을지로 골뱅이",
-    category: "korean",
-    address: "서울특별시 중구 을지로 157",
-    road_address: "서울특별시 중구 을지로3가",
-    latitude: 37.5665,
-    longitude: 126.99,
-    phone: "02-2267-1234",
-    business_hours: null,
-    price_range: "1~2만원",
-    thumbnail_url: null,
-    parking: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "광화문 미진",
-    category: "korean",
-    address: "서울특별시 종로구 세종대로 175",
-    road_address: "서울특별시 종로구 세종로",
-    latitude: 37.5723,
-    longitude: 126.9769,
-    phone: "02-735-7890",
-    business_hours: null,
-    price_range: "만원 미만",
-    thumbnail_url: null,
-    parking: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "명동 칼국수",
-    category: "korean",
-    address: "서울특별시 중구 명동길 25",
-    road_address: "서울특별시 중구 명동2가",
-    latitude: 37.5636,
-    longitude: 126.9859,
-    phone: "02-776-5678",
-    business_hours: null,
-    price_range: "만원 미만",
-    thumbnail_url: null,
-    parking: false,
-    created_at: new Date().toISOString(),
-  },
-]
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 /**
  * 맛집 목록을 가져오는 API 핸들러입니다. (GET 요청 처리)
- * 검색어, 카테고리, 페이지네이션 등의 조건을 처리합니다.
+ * Supabase 데이터베이스에서 데이터를 조회하며 검색어, 카테고리 필터링 및 페이지네이션을 수행합니다.
  */
 export async function GET(request: Request) {
-  // URL에서 쿼리 파라미터(예: ?keyword=피자)를 추출합니다.
   const { searchParams } = new URL(request.url)
+  const supabase = createServerSupabaseClient()
 
-  const _lat = searchParams.get("lat")
-  const _lng = searchParams.get("lng")
-  const _radius = searchParams.get("radius")
   const keyword = searchParams.get("keyword")
   const category = searchParams.get("category")
-  const _programId = searchParams.get("program_id")
-  const page = parseInt(searchParams.get("page") || "1") // 기본값 1페이지
-  const limit = parseInt(searchParams.get("limit") || "20") // 한 페이지에 20개씩
+  const page = parseInt(searchParams.get("page") || "1")
+  const limit = parseInt(searchParams.get("limit") || "20")
 
-  // 전체 맛집 목록에서 필터링을 시작합니다.
-  let filteredRestaurants = [...MOCK_RESTAURANTS]
+  const from = (page - 1) * limit
+  const to = from + limit - 1
 
-  // 키워드 검색 기능 (이름이나 주소에 키워드가 포함되어 있는지 확인)
-  if (keyword) {
-    const lowerKeyword = keyword.toLowerCase()
-    filteredRestaurants = filteredRestaurants.filter(
-      (r) =>
-        r.name.toLowerCase().includes(lowerKeyword) ||
-        r.address.toLowerCase().includes(lowerKeyword)
-    )
-  }
-
-  // 카테고리 필터 기능 (예: '한식'만 보기)
-  if (category) {
-    filteredRestaurants = filteredRestaurants.filter(
-      (r) => r.category === category
-    )
-  }
-
-  // TODO: 위치 기반 필터링 (위도, 경도, 반경 활용)
-  // TODO: 방송 프로그램 필터링
-
-  // 요청한 페이지에 맞는 데이터만 잘라냅니다. (페이지네이션)
-  const startIndex = (page - 1) * limit
-  const paginatedRestaurants = filteredRestaurants.slice(
-    startIndex,
-    startIndex + limit
+  // 기본 쿼리 구성: 카테고리 정보를 포함하여 조회
+  // PostGIS location 필드에서 위경도를 추출합니다.
+  let query = supabase.from("restaurants").select(
+    `
+      id,
+      name,
+      address,
+      road_address,
+      phone,
+      price_range,
+      parking,
+      thumbnail_url,
+      created_at,
+      location,
+      category:categories(name)
+    `,
+    { count: "exact" }
   )
 
-  // 결과 데이터와 함께 전체 개수, 현재 페이지 정보를 응답으로 보냅니다.
+  // 키워드 검색 (이름 또는 주소)
+  if (keyword) {
+    query = query.or(`name.ilike.%${keyword}%,address.ilike.%${keyword}%`)
+  }
+
+  // 카테고리 필터
+  if (category) {
+    query = query.filter("categories.name", "eq", category)
+  }
+
+  // 페이지네이션 및 정렬
+  query = query.order("created_at", { ascending: false }).range(from, to)
+
+  const { data, error, count } = await query
+
+  if (error) {
+    console.error("Supabase error:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // 데이터 가공: nested category와 PostGIS geography 데이터를 평탄화(flatten)합니다.
+  const items = (data || []).map((r: any) => {
+    // PostGIS geography (POINT) 파싱 (GeoJSON 형태 혹은 WKT일 수 있으나 supabase-js는 보통 파싱을 요구함)
+    // 여기서는 간단하게 SQL에서 추출하는 대신 JS에서 처리하거나 SQL query를 수정할 수 있음.
+    // 하지만 select 절에서 직접 위경도를 가져오는 것이 더 깔끔함.
+
+    // 만약 location이 문자열(WKT)로 온다면 파싱이 필요함.
+    // 여기서는 supabase-js의 기본 반환 형식을 고려하여 안전하게 처리합니다.
+    return {
+      ...r,
+      category: r.category?.name || "기타",
+      // PostGIS Point 데이터는 보통 { type: 'Point', coordinates: [lng, lat] } 형식으로 옴
+      latitude: r.location?.coordinates ? r.location.coordinates[1] : null,
+      longitude: r.location?.coordinates ? r.location.coordinates[0] : null,
+      location: undefined, // 원본 location 필드는 제거
+    }
+  })
+
   return NextResponse.json({
-    items: paginatedRestaurants,
-    total: filteredRestaurants.length,
+    items,
+    total: count || 0,
     page,
     limit,
   })

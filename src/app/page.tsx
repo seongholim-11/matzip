@@ -1,6 +1,13 @@
 "use client"
 
-import { Suspense, useCallback, useMemo, useRef, useState } from "react"
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { Loading } from "@/components/common/Loading"
 import { Header } from "@/components/layout/Header"
@@ -15,72 +22,20 @@ import { useIsDesktop } from "@/hooks/useMediaQuery"
 import { useUIStore } from "@/store/uiStore"
 import type { MapBounds, Restaurant } from "@/types/model"
 
-// Mock 데이터 (실제로는 API에서 가져옴)
-const MOCK_RESTAURANTS: Restaurant[] = [
-  {
-    id: "1",
-    name: "을지로 골뱅이",
-    category: "korean",
-    address: "서울특별시 중구 을지로 157",
-    road_address: "서울특별시 중구 을지로3가",
-    latitude: 37.5665,
-    longitude: 126.99,
-    phone: "02-2267-1234",
-    business_hours: null,
-    price_range: "1~2만원",
-    thumbnail_url: null,
-    parking: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "광화문 미진",
-    category: "korean",
-    address: "서울특별시 종로구 세종대로 175",
-    road_address: "서울특별시 종로구 세종로",
-    latitude: 37.5723,
-    longitude: 126.9769,
-    phone: "02-735-7890",
-    business_hours: null,
-    price_range: "만원 미만",
-    thumbnail_url: null,
-    parking: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "명동 칼국수",
-    category: "korean",
-    address: "서울특별시 중구 명동길 25",
-    road_address: "서울특별시 중구 명동2가",
-    latitude: 37.5636,
-    longitude: 126.9859,
-    phone: "02-776-5678",
-    business_hours: null,
-    price_range: "만원 미만",
-    thumbnail_url: null,
-    parking: false,
-    created_at: new Date().toISOString(),
-  },
-]
-
 /**
  * 메인 지도 페이지의 핵심 로직과 화면을 구성하는 컴포넌트입니다.
  */
 function MapPage() {
-  const isDesktop = useIsDesktop() // 현재 화면이 데스크탑 크기인지 확인하는 훅
-  // 지도 객체에 직접 접근하기 위한 참조(Ref) 변수
+  const isDesktop = useIsDesktop()
   const mapRef = useRef<{
     panTo: (lat: number, lng: number) => void
     zoomIn: () => void
     zoomOut: () => void
   } | null>(null)
 
-  // 전역 상태(UI 상태)관리 도구에서 필요한 것들을 가져옵니다.
   const { selectedRestaurantId, selectRestaurant, isDrawerOpen, closeDrawer } =
     useUIStore()
 
-  // 현재 사용자의 위치 정보를 가져오는 커스텀 훅
   const {
     getCurrentPosition,
     latitude,
@@ -88,23 +43,56 @@ function MapPage() {
     isLoading: isLocating,
   } = useGeolocation()
 
-  // 필터 상태 (어떤 카테고리나 프로그램이 선택되었는지)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
 
-  // 현재 지도에 보여줄 맛집 리스트 상태 (실제 서비스에서는 서버에서 가져옴)
-  const [restaurants] = useState<Restaurant[]>(MOCK_RESTAURANTS)
-  const [isLoading] = useState(false) // 데이터를 불러오는 중인지 여부
+  // 실제 데이터 상태
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [programs, setPrograms] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  /**
-   * 지도를 이리저리 움직여서 영역이 바뀌었을 때 실행되는 함수입니다.
-   * 바뀐 영역 안에 있는 맛집들만 새로 불러올 때 사용합니다.
-   */
-  const handleBoundsChanged = useCallback((_bounds: MapBounds) => {
-    // TODO: 새로운 영역(bounds) 내의 맛집들만 가져오는 API를 호출하는 로직이 들어갈 자리입니다.
+  // 식당 데이터 가져오기
+  const fetchRestaurants = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const params = new URLSearchParams()
+      if (selectedCategory) params.append("category", selectedCategory)
+      // TODO: selectedProgram 지원 시 API 업데이트 필요
+
+      const response = await fetch(`/api/restaurants?${params.toString()}`)
+      const data = await response.json()
+      setRestaurants(data.items || [])
+    } catch (error) {
+      console.error("Failed to fetch restaurants:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedCategory])
+
+  // 프로그램 목록 가져오기
+  const fetchPrograms = useCallback(async () => {
+    try {
+      const response = await fetch("/api/sources")
+      const data = await response.json()
+      setPrograms(data || [])
+    } catch (error) {
+      console.error("Failed to fetch programs:", error)
+    }
   }, [])
 
-  /** 마커를 클릭했을 때 해당 맛집을 '선택' 상태로 만듭니다. */
+  // 초기 로드 및 필터 변경 시 호출
+  useEffect(() => {
+    fetchRestaurants()
+  }, [fetchRestaurants])
+
+  useEffect(() => {
+    fetchPrograms()
+  }, [fetchPrograms])
+
+  const handleBoundsChanged = useCallback((_bounds: MapBounds) => {
+    // TODO: Bounds 기반 페칭 구현
+  }, [])
+
   const handleMarkerClick = useCallback(
     (restaurantId: string) => {
       selectRestaurant(restaurantId)
@@ -112,7 +100,6 @@ function MapPage() {
     [selectRestaurant]
   )
 
-  /** '내 위치' 버튼을 눌렀을 때 지도를 사용자의 현재 위치로 이동시킵니다. */
   const handleMyLocation = useCallback(() => {
     getCurrentPosition()
     if (latitude && longitude && mapRef.current) {
@@ -120,19 +107,17 @@ function MapPage() {
     }
   }, [getCurrentPosition, latitude, longitude])
 
-  /** 현재 수많은 맛집 중에서 사용자가 '선택'한 맛집 하나를 찾습니다. */
   const selectedRestaurant = useMemo(() => {
     return restaurants.find((r) => r.id === selectedRestaurantId) ?? null
   }, [restaurants, selectedRestaurantId])
 
-  /** 선택된 카테고리에 맞는 맛집들만 골라냅니다. */
   const filteredRestaurants = useMemo(() => {
+    // API에서 이미 필터링되어 오지만, 프로그램 필터는 프론트엔드에서 처리하거나 API를 확장할 수 있음
     return restaurants.filter((r) => {
-      if (selectedCategory && r.category !== selectedCategory) return false
-      // TODO: 방송 프로그램별로도 필터링하는 로직이 추가될 예정입니다.
+      // 프로그램 아이디 기반 필터링은 추후 restaurant_recommendations 테이블 조인 필요
       return true
     })
-  }, [restaurants, selectedCategory])
+  }, [restaurants])
 
   return (
     <div className="flex h-full flex-col">
@@ -155,6 +140,7 @@ function MapPage() {
                 selectedProgram={selectedProgram}
                 onCategoryChange={setSelectedCategory}
                 onProgramChange={setSelectedProgram}
+                programs={programs}
               />
             </div>
           )}
