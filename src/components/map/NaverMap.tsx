@@ -104,7 +104,8 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
         logoControlOptions: {
           position: naver.maps.Position.BOTTOM_LEFT,
         },
-      }
+        useStyleMap: true, // 최신 벡터 지도 엔진 활성화 (모바일에서 훨씬 선명함)
+      } as any
 
       const map = new naver.maps.Map(mapRef.current, mapOptions)
       mapInstanceRef.current = map

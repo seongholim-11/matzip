@@ -73,7 +73,10 @@ export default function RootLayout({
           content="TV와 유튜브에 소개된 맛집을 지도에서 탐색하세요"
         />
         <meta property="og:type" content="website" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className="h-dvh overflow-hidden">
