@@ -8,6 +8,7 @@ interface GeolocationState {
   accuracy: number | null
   error: string | null
   isLoading: boolean
+  timestamp: number | null
 }
 
 interface UseGeolocationOptions {
@@ -34,6 +35,7 @@ export function useGeolocation(
     accuracy: null,
     error: null,
     isLoading: false,
+    timestamp: null,
   })
 
   /** 브라우저의 전역 객체(navigator)를 이용해 위치를 요청합니다. */
@@ -57,6 +59,7 @@ export function useGeolocation(
           accuracy: position.coords.accuracy,
           error: null,
           isLoading: false,
+          timestamp: position.timestamp,
         })
       },
       (error) => {

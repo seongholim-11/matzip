@@ -14,7 +14,7 @@ import { Header } from "@/components/layout/Header"
 import { MobileDrawer } from "@/components/layout/MobileDrawer"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MapControls } from "@/components/map/MapControls"
-import { NaverMap } from "@/components/map/NaverMap"
+import { NaverMap, type NaverMapRef } from "@/components/map/NaverMap"
 import { OverlayCard } from "@/components/map/OverlayCard"
 import { FilterChips } from "@/components/search/FilterChips"
 import { useGeolocation } from "@/hooks/useGeolocation"
@@ -28,11 +28,7 @@ import type { MapBounds, Program, Restaurant } from "@/types/model"
  */
 function MapPage() {
   const isDesktop = useIsDesktop()
-  const mapRef = useRef<{
-    panTo: (lat: number, lng: number) => void
-    zoomIn: () => void
-    zoomOut: () => void
-  } | null>(null)
+  const mapRef = useRef<NaverMapRef | null>(null)
 
   const { selectedRestaurantId, selectRestaurant, isDrawerOpen, closeDrawer } =
     useUIStore()
@@ -41,6 +37,8 @@ function MapPage() {
     getCurrentPosition,
     latitude,
     longitude,
+    timestamp,
+    accuracy,
     isLoading: isLocating,
   } = useGeolocation()
 
@@ -51,6 +49,28 @@ function MapPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [programs, setPrograms] = useState<Program[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // 최초 로드 시 위치 정보 요청 및 자동 중앙 정렬 여부 관리
+  const [hasInitialCentered, setHasInitialCentered] = useState(false)
+
+  // 앱 접속 시 위치 정보 요청
+  useEffect(() => {
+    getCurrentPosition()
+  }, [getCurrentPosition])
+
+  // 현재 위치가 확보되면 지도를 해당 위치로 이동 (전체 로드 중 1회 또는 내 위치 버튼 클릭 시)
+  useEffect(() => {
+    if (latitude && longitude && mapRef.current) {
+      // 내 위치 버튼 클릭 혹은 최초 1회 자동 이동
+      if (!hasInitialCentered) {
+        mapRef.current.panTo(latitude, longitude)
+        setHasInitialCentered(true)
+      } else if (timestamp) {
+        // 이미 1회 수행된 이후에는 수동 버튼 클릭(timestamp 갱신) 시에만 이동
+        mapRef.current.panTo(latitude, longitude)
+      }
+    }
+  }, [latitude, longitude, timestamp, hasInitialCentered])
 
   // 식당 데이터 가져오기
   const fetchRestaurants = useCallback(async () => {
@@ -105,10 +125,7 @@ function MapPage() {
 
   const handleMyLocation = useCallback(() => {
     getCurrentPosition()
-    if (latitude && longitude && mapRef.current) {
-      mapRef.current.panTo(latitude, longitude)
-    }
-  }, [getCurrentPosition, latitude, longitude])
+  }, [getCurrentPosition])
 
   const selectedRestaurant = useMemo(() => {
     return restaurants.find((r) => r.id === selectedRestaurantId) ?? null
@@ -147,7 +164,12 @@ function MapPage() {
 
           {/* 실제 네이버 지도 컴포넌트 */}
           <NaverMap
+            ref={mapRef}
             restaurants={filteredRestaurants}
+            userLocation={
+              latitude && longitude ? { lat: latitude, lng: longitude } : null
+            }
+            accuracy={accuracy}
             onBoundsChanged={handleBoundsChanged}
             onMarkerClick={handleMarkerClick}
             selectedRestaurantId={selectedRestaurantId}
@@ -161,8 +183,8 @@ function MapPage() {
             isLocating={isLocating}
           />
 
-          {/* 데스크탑: 마커를 눌렀을 때 지도 위에 뜨는 맛집 요약 카드 */}
-          {isDesktop && selectedRestaurant && (
+          {/* 마커를 눌렀을 때 지도 위에 뜨는 맛집 요약 카드 */}
+          {selectedRestaurant && (
             <OverlayCard
               restaurant={selectedRestaurant}
               onClose={() => selectRestaurant(null)}
@@ -170,39 +192,6 @@ function MapPage() {
           )}
         </main>
       </div>
-
-      {/* 모바일: 마커를 눌렀을 때 화면 아래에서 올라오는 상세 정보창 */}
-      {!isDesktop && (
-        <MobileDrawer
-          isOpen={isDrawerOpen && !!selectedRestaurant}
-          onClose={closeDrawer}
-          title={selectedRestaurant?.name}
-        >
-          {selectedRestaurant && (
-            <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">
-                {selectedRestaurant.address}
-              </p>
-              <div className="flex gap-2">
-                <a
-                  href={`/restaurant/${selectedRestaurant.id}`}
-                  className="bg-primary text-primary-foreground flex-1 rounded-lg py-3 text-center text-sm font-medium"
-                >
-                  상세보기
-                </a>
-                <a
-                  href={`https://map.naver.com/v5/search/${encodeURIComponent(selectedRestaurant.name)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 rounded-lg border py-3 text-center text-sm font-medium"
-                >
-                  길찾기
-                </a>
-              </div>
-            </div>
-          )}
-        </MobileDrawer>
-      )}
     </div>
   )
 }

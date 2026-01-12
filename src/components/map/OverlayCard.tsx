@@ -1,6 +1,4 @@
-"use client"
-
-import { MapPin, X } from "lucide-react"
+import { ExternalLink, MapPin, Navigation, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -13,29 +11,30 @@ interface OverlayCardProps {
 }
 
 /**
- * 지도 위 마커를 클릭했을 때 해당 위치에 작게 나타나는 요약 정보 카드입니다.
+ * 지도 위 마커를 클릭했을 때 하단에 나타나는 요약 정보 카드입니다.
+ * 데스크탑에서는 중앙 하단에 떠 있고, 모바일에서는 하단에 밀착되어 나타납니다.
  */
 export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
   return (
-    <div className="bg-background absolute bottom-20 left-1/2 z-20 w-[280px] -translate-x-1/2 overflow-hidden rounded-xl border shadow-xl lg:bottom-24 lg:w-[320px]">
+    <div className="bg-background animate-in slide-in-from-bottom-full fixed right-4 bottom-4 left-4 z-40 overflow-hidden rounded-2xl border shadow-2xl duration-300 lg:absolute lg:right-auto lg:bottom-10 lg:left-1/2 lg:w-[360px] lg:-translate-x-1/2">
       {/* 닫기 버튼 */}
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 z-10 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70"
+        className="absolute top-2 right-2 z-10 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-md transition-colors hover:bg-black/40 lg:bg-black/50 lg:hover:bg-black/70"
       >
         <X className="h-4 w-4" />
       </button>
 
-      <Link href={`/restaurant/${restaurant.id}`}>
-        {/* 맛집 이미지 (없을 땐 핀 아이콘 표시) */}
-        <div className="bg-muted relative h-32 w-full lg:h-40">
+      <div className="flex flex-row lg:flex-col">
+        {/* 맛집 이미지 (모바일에서는 작게, 데스크탑에서는 카드 전체 가로폭) */}
+        <div className="bg-muted relative h-28 w-28 shrink-0 lg:h-44 lg:w-full">
           {restaurant.thumbnail_url ? (
             <Image
               src={restaurant.thumbnail_url}
               alt={restaurant.name}
               fill
               className="object-cover"
-              sizes="320px"
+              sizes="(max-width: 1024px) 112px, 360px"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -45,23 +44,44 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
         </div>
 
         {/* 짧은 정보 (이름, 카테고리, 주소) */}
-        <div className="p-3">
+        <div className="flex flex-1 flex-col justify-center p-4 lg:justify-start">
           <div className="mb-1 flex items-center gap-2">
-            <span className="bg-muted rounded-full px-2 py-0.5 text-xs">
+            <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-semibold lg:text-xs">
               {getCategoryName(restaurant.category)}
             </span>
             {restaurant.price_range && (
-              <span className="text-muted-foreground text-xs">
+              <span className="text-muted-foreground text-[10px] lg:text-xs">
                 {restaurant.price_range}
               </span>
             )}
           </div>
-          <h3 className="mb-1 font-bold">{restaurant.name}</h3>
-          <p className="text-muted-foreground line-clamp-1 text-xs">
+          <h3 className="mb-0.5 line-clamp-1 text-base font-bold lg:mb-1 lg:text-lg">
+            {restaurant.name}
+          </h3>
+          <p className="text-muted-foreground mb-3 line-clamp-1 text-xs">
             {restaurant.address}
           </p>
+
+          <div className="flex gap-2">
+            <Link
+              href={`/restaurant/${restaurant.id}`}
+              className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-opacity hover:opacity-90 lg:text-sm"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              상세보기
+            </Link>
+            <a
+              href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.name + " " + restaurant.address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-muted hover:bg-muted/80 flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors lg:text-sm"
+            >
+              <Navigation className="h-3.5 w-3.5 text-blue-500" />
+              길찾기
+            </a>
+          </div>
         </div>
-      </Link>
+      </div>
     </div>
   )
 }
