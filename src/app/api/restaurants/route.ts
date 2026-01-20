@@ -19,7 +19,13 @@ export async function GET(request: Request) {
   const to = from + limit - 1
 
   // 기본 쿼리 구성: 카테고리 정보를 포함하여 조회
-  // PostGIS location 필드에서 위경도를 추출합니다.
+  const programs = searchParams.get("programs")
+
+  // 프로그램 필터가 있으면 inner join을 사용하여 해당 프로그램에 속한 식당만 조회
+  const recommendationsJoin = programs
+    ? "restaurant_recommendations!inner(source_id)"
+    : "restaurant_recommendations(source_id)"
+
   let query = supabase.from("restaurants").select(
     `
       id,
@@ -32,7 +38,8 @@ export async function GET(request: Request) {
       thumbnail_url,
       created_at,
       location,
-      category:categories(name)
+      category:categories(name),
+      ${recommendationsJoin}
     `,
     { count: "exact" }
   )
@@ -45,6 +52,12 @@ export async function GET(request: Request) {
   // 카테고리 필터
   if (category) {
     query = query.filter("categories.name", "eq", category)
+  }
+
+  // 프로그램 필터 (멀티 선택)
+  if (programs) {
+    const programIds = programs.split(",")
+    query = query.in("restaurant_recommendations.source_id", programIds)
   }
 
   // 페이지네이션 및 정렬

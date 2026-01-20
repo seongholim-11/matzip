@@ -43,7 +43,7 @@ function MapPage() {
   } = useGeolocation()
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
+  const [selectedPrograms, setSelectedPrograms] = useState<string[]>([])
 
   // 실제 데이터 상태
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
@@ -78,7 +78,9 @@ function MapPage() {
       setIsLoading(true)
       const params = new URLSearchParams()
       if (selectedCategory) params.append("category", selectedCategory)
-      // TODO: selectedProgram 지원 시 API 업데이트 필요
+      if (selectedPrograms.length > 0) {
+        params.append("programs", selectedPrograms.join(","))
+      }
 
       const response = await fetch(`/api/restaurants?${params.toString()}`)
       const data = await response.json()
@@ -89,17 +91,26 @@ function MapPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategory])
+  }, [selectedCategory, selectedPrograms])
 
   // 프로그램 목록 가져오기
   const fetchPrograms = useCallback(async () => {
     try {
       const response = await fetch("/api/sources")
+      if (!response.ok) {
+        throw new Error("Failed to fetch sources")
+      }
       const data = await response.json()
-      setPrograms(data || [])
+
+      if (Array.isArray(data)) {
+        setPrograms(data)
+      } else {
+        setPrograms([])
+      }
     } catch (error) {
       // TODO: 에러 처리 UI 구현
-      logger.error("Failed to fetch restaurants:", error)
+      logger.error("Failed to fetch programs:", error)
+      setPrograms([])
     }
   }, [])
 
@@ -127,6 +138,16 @@ function MapPage() {
     getCurrentPosition()
   }, [getCurrentPosition])
 
+  const handleProgramToggle = useCallback((programId: string) => {
+    setSelectedPrograms((prev) => {
+      if (prev.includes(programId)) {
+        return prev.filter((id) => id !== programId)
+      } else {
+        return [...prev, programId]
+      }
+    })
+  }, [])
+
   const selectedRestaurant = useMemo(() => {
     return restaurants.find((r) => r.id === selectedRestaurantId) ?? null
   }, [restaurants, selectedRestaurantId])
@@ -144,7 +165,16 @@ function MapPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* 데스크탑에서만 보여주는 왼쪽 맛집 리스트 사이드바 */}
         {isDesktop && (
-          <Sidebar restaurants={filteredRestaurants} isLoading={isLoading} />
+          <Sidebar
+            restaurants={filteredRestaurants}
+            isLoading={isLoading}
+            selectedCategory={selectedCategory}
+            selectedPrograms={selectedPrograms}
+            onCategoryChange={setSelectedCategory}
+            onProgramToggle={handleProgramToggle}
+            onProgramsClear={() => setSelectedPrograms([])}
+            programs={programs}
+          />
         )}
 
         {/* 메인 지도 화면 영역 */}
@@ -154,9 +184,10 @@ function MapPage() {
             <div className="from-background absolute top-0 right-0 left-0 z-10 bg-gradient-to-b to-transparent p-4 pb-8">
               <FilterChips
                 selectedCategory={selectedCategory}
-                selectedProgram={selectedProgram}
+                selectedPrograms={selectedPrograms}
                 onCategoryChange={setSelectedCategory}
-                onProgramChange={setSelectedProgram}
+                onProgramToggle={handleProgramToggle}
+                onProgramsClear={() => setSelectedPrograms([])}
                 programs={programs}
               />
             </div>

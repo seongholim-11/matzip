@@ -8,6 +8,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("sources")
     .select("*")
+    .eq("is_delete", false)
     .order("name")
 
   if (error) {
