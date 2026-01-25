@@ -11,7 +11,6 @@ import {
 
 import { Loading } from "@/components/common/Loading"
 import { Header } from "@/components/layout/Header"
-import { MobileDrawer } from "@/components/layout/MobileDrawer"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MapControls } from "@/components/map/MapControls"
 import { NaverMap, type NaverMapRef } from "@/components/map/NaverMap"
@@ -30,8 +29,7 @@ function MapPage() {
   const isDesktop = useIsDesktop()
   const mapRef = useRef<NaverMapRef | null>(null)
 
-  const { selectedRestaurantId, selectRestaurant, isDrawerOpen, closeDrawer } =
-    useUIStore()
+  const { selectedRestaurantId, selectRestaurant } = useUIStore()
 
   const {
     getCurrentPosition,

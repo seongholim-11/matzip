@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Search } from "lucide-react"
+import { Search } from "lucide-react"
 
 import { getCategoryName } from "@/lib/constants/categories"
 import { getMarkerColor } from "@/lib/constants/colors"

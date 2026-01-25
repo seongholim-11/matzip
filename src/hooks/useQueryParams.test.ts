@@ -17,11 +17,15 @@ describe("useQueryParams hook", () => {
 
   beforeEach(() => {
     // 각 훅이 반환할 기본값들을 설정합니다.
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any)
+    vi.mocked(useRouter).mockReturnValue({
+      push: mockPush,
+    } as unknown as ReturnType<typeof useRouter>)
     vi.mocked(usePathname).mockReturnValue(mockPathname)
     // 초기 쿼리 파라미터가 ?a=1&b=2 인 상태를 시뮬레이션합니다.
     vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams("a=1&b=2") as any
+      new URLSearchParams("a=1&b=2") as unknown as ReturnType<
+        typeof useSearchParams
+      >
     )
   })
 

@@ -113,7 +113,13 @@ export async function GET(request: Request) {
       latitude: number
       longitude: number
       category: { name: string } | null
-      recommendations: any[]
+      recommendations: {
+        source_id: string
+        source: {
+          id: string
+          name: string
+        }
+      }[]
     }
 
     // 데이터 가공
@@ -134,7 +140,9 @@ export async function GET(request: Request) {
       page,
       limit,
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

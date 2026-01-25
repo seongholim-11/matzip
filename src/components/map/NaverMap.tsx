@@ -92,8 +92,12 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
     const initMap = useCallback(() => {
       if (!mapRef.current || !window.naver?.maps) return
 
+      interface ExtendedMapOptions extends naver.maps.MapOptions {
+        useStyleMap?: boolean
+      }
+
       // 지도가 처음 켜질 때의 옵션(중심 위치, 확대 레벨 등)을 설정합니다.
-      const mapOptions: naver.maps.MapOptions = {
+      const mapOptions: ExtendedMapOptions = {
         center: new naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
         zoom: initialZoom,
         minZoom: 6,
@@ -106,7 +110,7 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
           position: naver.maps.Position.BOTTOM_LEFT,
         },
         useStyleMap: true, // 최신 벡터 지도 엔진 활성화 (모바일에서 훨씬 선명함)
-      } as any
+      }
 
       const map = new naver.maps.Map(mapRef.current, mapOptions)
       mapInstanceRef.current = map
