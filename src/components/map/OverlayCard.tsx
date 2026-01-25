@@ -1,6 +1,6 @@
 import { Navigation, X } from "lucide-react"
 
-import { getCategoryName } from "@/lib/constants/categories"
+import { RestaurantInfoContent } from "@/components/restaurant/RestaurantInfoContent"
 import type { Restaurant } from "@/types/model"
 
 interface OverlayCardProps {
@@ -25,25 +25,10 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
 
       <div className="flex flex-col">
         {/* 짧은 정보 (이름, 카테고리, 주소) */}
-        <div className="flex flex-1 flex-col justify-center p-4 lg:justify-start">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-semibold lg:text-xs">
-              {getCategoryName(restaurant.category)}
-            </span>
-            {restaurant.price_range && (
-              <span className="text-muted-foreground text-[10px] lg:text-xs">
-                {restaurant.price_range}
-              </span>
-            )}
-          </div>
-          <h3 className="mb-0.5 line-clamp-1 text-base font-bold lg:mb-1 lg:text-lg">
-            {restaurant.name}
-          </h3>
-          <p className="text-muted-foreground mb-3 line-clamp-1 text-xs">
-            {restaurant.address}
-          </p>
+        <div className="flex flex-1 flex-col justify-center p-5 lg:justify-start">
+          <RestaurantInfoContent restaurant={restaurant} />
 
-          <div className="flex gap-2">
+          <div className="mt-4 flex gap-2">
             <a
               href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.name + " " + restaurant.address)}`}
               target="_blank"
