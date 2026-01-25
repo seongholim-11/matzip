@@ -37,6 +37,7 @@ function MapPage() {
     longitude,
     timestamp,
     accuracy,
+    error,
     isLoading: isLocating,
   } = useGeolocation()
 
@@ -136,6 +137,15 @@ function MapPage() {
   const handleMyLocation = useCallback(() => {
     getCurrentPosition()
   }, [getCurrentPosition])
+
+  // 위치 권한 거부 시 안내 메시지 표시
+  useEffect(() => {
+    if (error && error.includes("권한")) {
+      alert(
+        "위치 정보 접근 권한이 거부되었습니다.\n\n사용자의 현재 위치를 확인하려면 브라우저 주소창 왼쪽의 자물쇠 아이콘을 클릭하여 위치 권한을 '허용'으로 변경해 주세요."
+      )
+    }
+  }, [error])
 
   const handleProgramToggle = useCallback((programId: string) => {
     setSelectedPrograms((prev) => {

@@ -95,5 +95,6 @@ export function useGeolocation(
     ...state,
     getCurrentPosition,
     isSupported: typeof navigator !== "undefined" && !!navigator.geolocation,
+    isPermissionDenied: state.error?.includes("권한"),
   }
 }
