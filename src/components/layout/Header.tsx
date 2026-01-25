@@ -46,29 +46,7 @@ export function Header() {
           </div>
         )}
 
-        {/* 오른쪽 끝: 메뉴 전환 버튼 (지도 / 프로그램) */}
-        <nav className="flex items-center gap-1">
-          <Link href="/">
-            <Button
-              variant={pathname === "/" ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Map className="h-4 w-4" />
-              {!isMobile && <span>지도</span>}
-            </Button>
-          </Link>
-          <Link href="/program">
-            <Button
-              variant={pathname.startsWith("/program") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Tv className="h-4 w-4" />
-              {!isMobile && <span>프로그램</span>}
-            </Button>
-          </Link>
-        </nav>
+        <div className="flex w-10 items-center justify-end" />
       </div>
 
       {/* 모바일 하단 검색바 (핸드폰 화면에서만 로고 아래에 나타남) */}
