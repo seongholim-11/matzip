@@ -143,54 +143,47 @@ export function Sidebar({
                   <ChevronLeft className="h-5 w-5" />
                 </button>
 
-                <div className="flex gap-1">
-                  {
-                    Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((page) => {
-                        // 현재 페이지 주변만 표시 (예: -2 ~ +2) 및 첫/마지막 페이지 처리
-                        // 간단하게는 모두 표시하되, 너무 많으면 ... 처리가 필요함
-                        // 여기서는 간단히 현재 페이지 주변 5개만 표시하도록 구현
-                        return (
-                          Math.abs(currentPage - page) < 3 ||
-                          page === 1 ||
-                          page === totalPages
-                        )
-                      })
-                      .map((page, index, array) => {
-                        // ... 처리 로직이 복잡해질 수 있으므로, 우선은 심플하게 전체 다 보여주거나
-                        // 스크롤이 생기게 두는 방법도 있음.
-                        // 사용자 요청은 "1,2,3... 번호로 해줘" 이므로 가능한 다 보여주되
-                        // 너무 많을 경우를 대비해 스크롤 가능하게 하거나 로직 추가
+                <div className="flex max-w-[240px] flex-wrap justify-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      // 10페이지 이하라면 모두 표시
+                      if (totalPages <= 10) return true
 
-                        // 여기서는 간단하게 10페이지 이하면 다 보여주고,
-                        // 많으면 현재 주변만 보여주는 로직을 넣겠습니다.
-                        if (totalPages <= 10) return true
-
-                        // ... 로직을 넣기 위해선 렌더링 시에 판단해야 함.
-                        // 일단 간단히 모든 페이지 번호를 스크롤 가능한 영역에 렌더링하겠습니다.
-                        return true
-                      })
-                    // 중복 제거 (위 필터는 예시였고, 실제로는 아래 로직 사용)
-                  }
-
-                  {/* 페이지 번호가 많을 경우 가로 스크롤 되도록 구현 */}
-                  <div className="scrollbar-hide flex max-w-[200px] gap-1 overflow-x-auto">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`h-8 min-w-[32px] rounded px-2 text-sm transition-colors ${
-                            currentPage === page
-                              ? "bg-primary text-primary-foreground font-bold"
-                              : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          {page}
-                        </button>
+                      // 현재 페이지 주변(±2), 첫 페이지, 마지막 페이지만 표시
+                      return (
+                        Math.abs(currentPage - page) < 3 ||
+                        page === 1 ||
+                        page === totalPages
                       )
-                    )}
-                  </div>
+                    })
+                    .map((page, index, array) => {
+                      // 페이지 번호 사이에 갭이 있다면 ... 을 표시하는 로직이 필요하지만
+                      // 우선은 간단하게 버튼만 나열 (사용자가 번호를 원함)
+                      // 필요하다면 추후 ... 추가
+
+                      const showEllipsis =
+                        index > 0 && page - array[index - 1] > 1
+
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsis && (
+                            <span className="text-muted-foreground mx-1 text-xs">
+                              ...
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handlePageChange(page)}
+                            className={`h-8 min-w-[32px] rounded px-2 text-sm transition-colors ${
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground font-bold"
+                                : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </div>
+                      )
+                    })}
                 </div>
 
                 <button

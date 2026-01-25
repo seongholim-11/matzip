@@ -15,6 +15,12 @@ export interface Restaurant {
   thumbnail_url: string | null // 대표 이미지 링크
   parking: boolean // 주차 가능 여부 (true/false)
   created_at: string // 데이터가 생성된 날짜와 시간
+  recommendations?: {
+    source: {
+      id: string
+      name: string
+    }
+  }[] // 추천 소스 정보 (채널 정보 포함)
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
 } from "@/lib/constants/categories"
+import { getMarkerColor } from "@/lib/constants/colors"
 import type { MapBounds, Restaurant } from "@/types/model"
 
 export interface NaverMapRef {
@@ -207,6 +208,10 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
 
       // 2. 새로운 맛집 리스트를 돌면서 마커를 하나씩 생성합니다.
       restaurants.forEach((restaurant) => {
+        // 첫 번째 추천 정보의 채널명을 확인하여 색상 결정
+        const channelName = restaurant.recommendations?.[0]?.source?.name
+        const markerColor = getMarkerColor(channelName)
+
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(
             restaurant.latitude,
@@ -218,7 +223,7 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
           icon: {
             content: `
             <div class="marker ${selectedRestaurantId === restaurant.id ? "marker--selected" : ""}">
-              <div class="marker-inner">
+              <div class="marker-inner" style="color: ${markerColor}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
@@ -289,11 +294,12 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
             justify-content: center;
             width: 32px;
             height: 32px;
-            color: #f97316;
+            /* color는 인라인 스타일로 동적 주입됨 */
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
           }
           .marker--selected .marker-inner {
-            color: #dc2626;
+            filter: drop-shadow(0 0 8px currentColor);
+            transform: scale(1.1);
           }
 
           .user-marker {
