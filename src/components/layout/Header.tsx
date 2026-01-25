@@ -1,10 +1,8 @@
 "use client"
 
-import { Map, Search, Tv } from "lucide-react"
+import { Search, Tv } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 
-import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/useMediaQuery"
 import { useUIStore } from "@/store/uiStore"
 
@@ -13,7 +11,6 @@ import { useUIStore } from "@/store/uiStore"
  * 로고, 검색바(데스크탑/모바일), 네비게이션 버튼들을 포함합니다.
  */
 export function Header() {
-  const pathname = usePathname()
   const isMobile = useIsMobile()
   const { setSearchFocused } = useUIStore()
 
