@@ -4,6 +4,19 @@ import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 /**
+ * HTML 엔티티(예: &amp;)를 실제 문자(&)로 변환하는 간단한 유틸리티 함수입니다.
+ */
+function decodeHtmlEntities(text: string): string {
+  if (!text) return ""
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+}
+
+/**
  * 맛집 목록을 가져오는 API 핸들러입니다. (GET 요청 처리)
  * Supabase 데이터베이스에서 데이터를 조회하며 검색어, 카테고리 필터링 및 페이지네이션을 수행합니다.
  */
@@ -126,6 +139,7 @@ export async function GET(request: Request) {
     const items = ((data as unknown as SupabaseRestaurant[]) || []).map((r) => {
       return {
         ...r,
+        name: decodeHtmlEntities(r.name),
         category: r.category?.name || "기타",
         location: undefined,
         latitude: r.latitude,
