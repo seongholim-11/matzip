@@ -161,7 +161,7 @@ export function FilterChips({
             }
           }}
         >
-          {CATEGORIES.slice(0, 8).map((category) => (
+          {CATEGORIES.map((category) => (
             <div key={category.id} className="relative shrink-0">
               <button
                 onClick={() =>

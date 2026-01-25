@@ -71,6 +71,7 @@ export async function GET(request: Request) {
             location,
             latitude,
             longitude,
+            category_id,
             category:categories(name),
             recommendations: ${recommendationsJoin}
           `,
@@ -82,9 +83,9 @@ export async function GET(request: Request) {
           query = query.or(`name.ilike.%${keyword}%,address.ilike.%${keyword}%`)
         }
 
-        // 카테고리 필터
+        // 카테고리 필터 (DB의 category_id와 프론트엔드의 ID 일치함)
         if (category) {
-          query = query.filter("categories.name", "eq", category)
+          query = query.eq("category_id", category)
         }
 
         // 프로그램 필터 (멀티 선택)
@@ -125,6 +126,7 @@ export async function GET(request: Request) {
       created_at: string
       latitude: number
       longitude: number
+      category_id: string | null
       category: { name: string } | null
       recommendations: {
         source_id: string
@@ -140,7 +142,8 @@ export async function GET(request: Request) {
       return {
         ...r,
         name: decodeHtmlEntities(r.name),
-        category: r.category?.name || "기타",
+        // DB의 category_id가 있으면 프론트엔드 상수의 ID로 사용됨
+        category: r.category_id || "etc",
         location: undefined,
         latitude: r.latitude,
         longitude: r.longitude,
