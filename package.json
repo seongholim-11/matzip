@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "clean": "Remove-Item -Recurse -Force .next",
-    "reset": "taskkill /F /IM node.exe /T; npx rimraf .next; pnpm run dev",
+    "clean": "npx rimraf .next",
+    "reset": "taskkill /F /IM node.exe /T /FI \"STATUS eq RUNNING\" & npx rimraf .next & pnpm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
