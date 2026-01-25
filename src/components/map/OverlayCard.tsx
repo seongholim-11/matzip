@@ -1,6 +1,4 @@
-import { ExternalLink, MapPin, Navigation, X } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { Navigation, X } from "lucide-react"
 
 import { getCategoryName } from "@/lib/constants/categories"
 import type { Restaurant } from "@/types/model"
@@ -25,24 +23,7 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
         <X className="h-4 w-4" />
       </button>
 
-      <div className="flex flex-row lg:flex-col">
-        {/* 맛집 이미지 (모바일에서는 작게, 데스크탑에서는 카드 전체 가로폭) */}
-        <div className="bg-muted relative h-28 w-28 shrink-0 lg:h-44 lg:w-full">
-          {restaurant.thumbnail_url ? (
-            <Image
-              src={restaurant.thumbnail_url}
-              alt={restaurant.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 112px, 360px"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <MapPin className="text-muted-foreground h-8 w-8" />
-            </div>
-          )}
-        </div>
-
+      <div className="flex flex-col">
         {/* 짧은 정보 (이름, 카테고리, 주소) */}
         <div className="flex flex-1 flex-col justify-center p-4 lg:justify-start">
           <div className="mb-1 flex items-center gap-2">
@@ -63,21 +44,14 @@ export function OverlayCard({ restaurant, onClose }: OverlayCardProps) {
           </p>
 
           <div className="flex gap-2">
-            <Link
-              href={`/restaurant/${restaurant.id}`}
-              className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-opacity hover:opacity-90 lg:text-sm"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              상세보기
-            </Link>
             <a
               href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.name + " " + restaurant.address)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-muted hover:bg-muted/80 flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors lg:text-sm"
+              className="bg-muted hover:bg-muted/80 flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors"
             >
-              <Navigation className="h-3.5 w-3.5 text-blue-500" />
-              길찾기
+              <Navigation className="h-4 w-4 text-blue-500" />
+              네이버 지도 열기
             </a>
           </div>
         </div>

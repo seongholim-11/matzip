@@ -3,6 +3,7 @@
 import { useRef, useState, MouseEvent } from "react"
 
 import { CATEGORIES } from "@/lib/constants/categories"
+import { getMarkerColor } from "@/lib/constants/colors"
 import type { Program } from "@/types/model"
 
 interface FilterChipsProps {
@@ -117,14 +118,19 @@ export function FilterChips({
         >
           {programs.map((program) => {
             const isSelected = selectedPrograms.includes(program.id)
+            const chipColor = getMarkerColor(program.name)
+
             return (
               <div key={program.id} className="relative shrink-0">
                 <button
                   onClick={() => onProgramToggle(program.id)}
-                  className={`rounded-full px-3 py-1.5 font-medium transition-colors select-none ${
-                    isSelected
-                      ? "bg-orange-500 text-white shadow-sm"
-                      : "border border-orange-100 bg-orange-50 text-orange-700 hover:bg-orange-100"
+                  style={{
+                    backgroundColor: isSelected ? chipColor : `${chipColor}15`,
+                    color: isSelected ? "white" : chipColor,
+                    borderColor: isSelected ? chipColor : `${chipColor}40`,
+                  }}
+                  className={`rounded-full border px-3 py-1.5 font-semibold transition-all select-none hover:opacity-80 active:scale-95 ${
+                    isSelected ? "shadow-md" : ""
                   }`}
                 >
                   {isSelected && "✓ "}

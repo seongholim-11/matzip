@@ -1,10 +1,9 @@
 "use client"
 
-import { MapPin, Tv } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { MapPin, Search } from "lucide-react"
 
 import { getCategoryName } from "@/lib/constants/categories"
+import { getMarkerColor } from "@/lib/constants/colors"
 import type { Restaurant } from "@/types/model"
 
 interface RestaurantCardProps {
@@ -21,71 +20,59 @@ export function RestaurantCard({
   isSelected,
   onClick,
 }: RestaurantCardProps) {
+  // 첫 번째 프로그램 정보 가져오기
+  const appearance = restaurant.recommendations?.[0]
+  const programName = appearance?.source?.name
+  const markerColor = getMarkerColor(programName)
+
   return (
     <div
       className={`hover:bg-muted/50 cursor-pointer p-4 transition-colors ${
-        isSelected ? "bg-muted" : ""
+        isSelected ? "bg-muted font-bold" : ""
       }`}
       onClick={onClick}
     >
-      <div className="flex gap-3">
-        {/* 맛집 대표 이미지 (없으면 기본 아이콘 표시) */}
-        <div className="bg-muted relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
-          {restaurant.thumbnail_url ? (
-            <Image
-              src={restaurant.thumbnail_url}
-              alt={restaurant.name}
-              fill
-              className="object-cover"
-              sizes="80px"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <MapPin className="text-muted-foreground h-6 w-6" />
-            </div>
-          )}
-        </div>
-
+      <div className="flex flex-col gap-1">
         {/* 정보 */}
         <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <h3 className="truncate font-semibold">{restaurant.name}</h3>
-            {/* 방송 뱃지 - 추후 appearances 데이터 연결 */}
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
-              <Tv className="h-3 w-3" />
-              방송
-            </span>
+          <div className="flex flex-col gap-0.5">
+            <h3 className="truncate text-base leading-tight font-bold">
+              {restaurant.name}
+            </h3>
+            {/* 프로그램 정보 표시 (핀 색상과 일치) */}
+            {programName && (
+              <span
+                className="truncate text-[11px] font-semibold"
+                style={{ color: markerColor }}
+              >
+                {programName}
+              </span>
+            )}
           </div>
 
-          <p className="text-muted-foreground mb-1 text-sm">
+          <p className="text-muted-foreground mt-1 text-xs">
             {getCategoryName(restaurant.category)}
             {restaurant.price_range && ` · ${restaurant.price_range}`}
           </p>
 
-          <p className="text-muted-foreground truncate text-xs">
+          <p className="text-muted-foreground truncate text-[11px]">
             {restaurant.address}
           </p>
         </div>
       </div>
 
-      {/* 카드가 선택되었을 때만 나타나는 추가 버튼 (상세보기, 길찾기) */}
+      {/* 카드가 선택되었을 때만 나타나는 버튼 (네이버 지도) */}
       {isSelected && (
-        <div className="mt-3 flex gap-2">
-          <Link
-            href={`/restaurant/${restaurant.id}`}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
-            onClick={(e) => e.stopPropagation()} // 카드 자체의 클릭 이벤트가 실행되지 않게 막음
-          >
-            상세보기
-          </Link>
+        <div className="mt-3">
           <a
-            href={`https://map.naver.com/v5/directions/-/-/-/transit?c=${restaurant.longitude},${restaurant.latitude},15,0,0,0,dh`}
+            href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.name + " " + restaurant.address)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-muted flex-1 rounded-lg border py-2 text-center text-sm font-medium transition-colors"
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             onClick={(e) => e.stopPropagation()}
           >
-            길찾기
+            <Search className="h-4 w-4 text-green-500" />
+            네이버 지도 열기
           </a>
         </div>
       )}
