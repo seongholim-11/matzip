@@ -77,6 +77,7 @@ function MapPage() {
     try {
       setIsLoading(true)
       const params = new URLSearchParams()
+      params.append("limit", "-1") // 전체 데이터 가져오기
       if (selectedCategory) params.append("category", selectedCategory)
       if (selectedPrograms.length > 0) {
         params.append("programs", selectedPrograms.join(","))
