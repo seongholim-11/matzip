@@ -215,6 +215,7 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
         // 첫 번째 추천 정보의 채널명을 확인하여 색상 결정
         const channelName = restaurant.recommendations?.[0]?.source?.name
         const markerColor = getMarkerColor(channelName)
+        const isSelected = selectedRestaurantId === restaurant.id
 
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(
@@ -223,10 +224,12 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
           ),
           map: mapInstanceRef.current!,
           title: restaurant.name,
+          zIndex: isSelected ? 1000 : 100,
           // 마커의 모양(디자인)을 직접 HTML과 CSS로 정의합니다.
           icon: {
             content: `
-            <div class="marker ${selectedRestaurantId === restaurant.id ? "marker--selected" : ""}">
+            <div class="marker ${isSelected ? "marker--selected" : ""}">
+              ${isSelected ? '<div class="marker-pulse" style="background-color: ' + markerColor + '"></div>' : ""}
               <div class="marker-inner" style="color: ${markerColor}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -290,7 +293,7 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
           }
           .marker:hover,
           .marker--selected {
-            transform: scale(1.2);
+            transform: scale(1.4);
           }
           .marker-inner {
             display: flex;
@@ -302,8 +305,35 @@ export const NaverMap = forwardRef<NaverMapRef, NaverMapProps>(
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
           }
           .marker--selected .marker-inner {
-            filter: drop-shadow(0 0 8px currentColor);
+            filter: drop-shadow(0 0 12px currentColor);
             transform: scale(1.1);
+            stroke: white;
+            stroke-width: 1px;
+          }
+
+          .marker-pulse {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: marker-pulse-anim 2s infinite;
+            z-index: -1;
+          }
+
+          @keyframes marker-pulse-anim {
+            0% {
+              transform: scale(0.8);
+              opacity: 0.8;
+            }
+            70% {
+              transform: scale(2.5);
+              opacity: 0;
+            }
+            100% {
+              transform: scale(2.5);
+              opacity: 0;
+            }
           }
 
           .user-marker {
