@@ -34,7 +34,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
       routes.push(...restaurantRoutes)
     }
-  } catch (error) {}
+  } catch (error: any) {
+    console.error("Failed to generate sitemap:", error.message)
+  }
 
   return routes
 }
