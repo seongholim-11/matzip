@@ -19,6 +19,7 @@ import { FilterChips } from "@/components/search/FilterChips"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import { useIsDesktop } from "@/hooks/useMediaQuery"
 import { logger } from "@/services/logger"
+import { useSearchStore } from "@/store/searchStore"
 import { useUIStore } from "@/store/uiStore"
 import type { MapBounds, Program, Restaurant } from "@/types/model"
 
@@ -30,6 +31,7 @@ function MapPage() {
   const mapRef = useRef<NaverMapRef | null>(null)
 
   const { selectedRestaurantId, selectRestaurant } = useUIStore()
+  const { keyword } = useSearchStore()
 
   const {
     getCurrentPosition,
@@ -77,6 +79,7 @@ function MapPage() {
       setIsLoading(true)
       const params = new URLSearchParams()
       params.append("limit", "-1") // 전체 데이터 가져오기
+      if (keyword) params.append("keyword", keyword)
       if (selectedCategory) params.append("category", selectedCategory)
       if (selectedPrograms.length > 0) {
         params.append("programs", selectedPrograms.join(","))
@@ -91,12 +94,14 @@ function MapPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategory, selectedPrograms])
+  }, [selectedCategory, selectedPrograms, keyword])
 
   // 프로그램 목록 가져오기
   const fetchPrograms = useCallback(async () => {
     try {
-      const response = await fetch("/api/sources")
+      const params = new URLSearchParams()
+      if (keyword) params.append("keyword", keyword)
+      const response = await fetch(`/api/sources?${params.toString()}`)
       if (!response.ok) {
         throw new Error("Failed to fetch sources")
       }
@@ -112,7 +117,7 @@ function MapPage() {
       logger.error("Failed to fetch programs:", error)
       setPrograms([])
     }
-  }, [])
+  }, [keyword])
 
   // 초기 로드 및 필터 변경 시 호출
   useEffect(() => {

@@ -1,9 +1,10 @@
 "use client"
 
-import { Search, Tv } from "lucide-react"
+import { Search, Tv, X } from "lucide-react"
 import Link from "next/link"
 
 import { useIsMobile } from "@/hooks/useMediaQuery"
+import { useSearchStore } from "@/store/searchStore"
 import { useUIStore } from "@/store/uiStore"
 
 /**
@@ -13,6 +14,7 @@ import { useUIStore } from "@/store/uiStore"
 export function Header() {
   const isMobile = useIsMobile()
   const { setSearchFocused } = useUIStore()
+  const { keyword, setKeyword } = useSearchStore()
 
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
@@ -35,10 +37,20 @@ export function Header() {
               <input
                 type="text"
                 placeholder="맛집, 지역, 프로그램 검색..."
-                className="bg-muted/50 focus:border-primary focus:bg-background h-10 w-full rounded-full border pr-4 pl-10 text-sm transition-colors focus:outline-none"
+                className="bg-muted/50 focus:border-primary focus:bg-background h-10 w-full rounded-full border pr-10 pl-10 text-sm transition-colors focus:outline-none"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
               />
+              {keyword && (
+                <button
+                  onClick={() => setKeyword("")}
+                  className="hover:bg-muted absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 transition-colors"
+                >
+                  <X className="text-muted-foreground h-3 w-3" />
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -54,8 +66,18 @@ export function Header() {
             <input
               type="text"
               placeholder="맛집, 지역, 프로그램 검색..."
-              className="bg-muted/50 focus:border-primary focus:bg-background h-10 w-full rounded-full border pr-4 pl-10 text-sm transition-colors focus:outline-none"
+              className="bg-muted/50 focus:border-primary focus:bg-background h-10 w-full rounded-full border pr-10 pl-10 text-sm transition-colors focus:outline-none"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
             />
+            {keyword && (
+              <button
+                onClick={() => setKeyword("")}
+                className="hover:bg-muted absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 transition-colors"
+              >
+                <X className="text-muted-foreground h-3 w-3" />
+              </button>
+            )}
           </div>
         </div>
       )}
